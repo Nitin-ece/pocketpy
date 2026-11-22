@@ -8,8 +8,6 @@ static bool c11_array2d_like_is_valid(c11_array2d_like* self, int col, int row) 
     return col >= 0 && col < self->n_cols && row >= 0 && row < self->n_rows;
 }
 
-#define MAX_ARRAY2D_NUMEL ((INT_MAX - (int)sizeof(PyObject) - (int)sizeof(c11_array2d)) / (int)sizeof(py_TValue))
-
 static bool c11_array2d__check_dims(int64_t n_cols, int64_t n_rows, int* out_numel) {
     if(n_cols <= 0 || n_rows <= 0) {
         return ValueError("array2d() expected positive dimensions");
@@ -17,8 +15,9 @@ static bool c11_array2d__check_dims(int64_t n_cols, int64_t n_rows, int* out_num
     if(n_cols > INT_MAX || n_rows > INT_MAX) {
         return ValueError("array2d() dimensions too large");
     }
+    int64_t max_numel = ((int64_t)INT_MAX - sizeof(PyObject) - sizeof(c11_array2d)) / sizeof(py_TValue);
     int64_t numel = n_cols * n_rows;
-    if(numel > MAX_ARRAY2D_NUMEL) {
+    if(numel > max_numel) {
         return ValueError("array2d() size too large");
     }
     if(out_numel) *out_numel = (int)numel;
